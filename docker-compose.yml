@@ -1,0 +1,25 @@
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      INVENTORY_PATH: /app/data/inventory.json
+      DATABASE_PATH: /db/gauntlet.db
+      SCAN_WORKERS: "4"
+    volumes:
+      - ./data:/app/data:ro   # the snapshot (read-only)
+      - gauntlet-db:/db       # SQLite lives here so scans survive restarts
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:8080"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  gauntlet-db:
